@@ -76,12 +76,13 @@ class ImportSpec extends Specification with XmlMatchers {
       formatErrorMessage(errorMessage, prettyPrintCaseClass(expected), prettyPrintCaseClass(actual))
     }
 
+    val expectedStr = getExpectedStr(testDataFile, base)
+    val actualStr = Loader.load(
+      base, options, SbtVersionFull, pluginFile = PluginFile,
+      sbtGlobalBase = sbtGlobalBase, sbtBootDir = sbtBootDir, sbtIvyHome = sbtIvyHome,
+      verbose = true).mkString("\n")
+
     try {
-      val expectedStr = getExpectedStr(testDataFile, base)
-      val actualStr = Loader.load(
-        base, options, SbtVersionFull, pluginFile = PluginFile,
-        sbtGlobalBase = sbtGlobalBase, sbtBootDir = sbtBootDir, sbtIvyHome = sbtIvyHome,
-        verbose = true).mkString("\n")
       val actualXml = XML.loadString(actualStr)
       val expectedXml = XML.loadString(expectedStr)
       val actual = actualXml.deserialize[StructureData].right.get
@@ -91,6 +92,12 @@ class ImportSpec extends Specification with XmlMatchers {
       actualXml must beEqualToIgnoringSpace(expectedXml).updateMessage(_ => onXmlFail(actualStr, expectedStr))
 
     } catch {
+      case x: SAXParseException =>
+        System.err.println("SAX parse error. Actual/Expected XML was:")
+        System.err.println("Actual: \n" + actualStr)
+        System.err.println("Expected: \n" + expectedStr)
+
+        x.printStackTrace(System.err)
       case x: Throwable =>
         x.printStackTrace(System.err)
         throw x
