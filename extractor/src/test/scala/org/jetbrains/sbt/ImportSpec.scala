@@ -47,14 +47,14 @@ class ImportSpec extends Specification with XmlMatchers {
 
   private def equalExpectedOneIn(projectName: String, conditions: => MatchResult[Any] = always,
                                  options: String = "resolveClassifiers resolveSbtClassifiers resolveJavadocs") =
-    ("equal expected one in '" + projectName + "' project [" + SbtVersionFull + "]").in { _: String =>
+    ("equal expected onae in '" + projectName + "' project [" + SbtVersionFull + "]").in { _: String =>
       if (conditions.isSuccess)
         testProject(projectName, options)
       else
         conditions
     }
 
-  private def testProject(project: String, options: String) = {
+  private def testProject(project: String, options: String): MatchResult[Elem] = {
     val base = new File(TestDataRoot, project)
     val testDataFile = new File(base, "structure-" + SbtVersionFull + ".xml")
 
@@ -98,11 +98,13 @@ class ImportSpec extends Specification with XmlMatchers {
         System.err.println("Expected: \n" + expectedStr)
 
         x.printStackTrace(System.err)
+        throw x
       case x: Throwable =>
         x.printStackTrace(System.err)
         throw x
     }
   }
+
   private def normalizePath(path: String): String =
     path.replace('\\', '/')
 
