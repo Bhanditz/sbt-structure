@@ -47,7 +47,7 @@ class ImportSpec extends Specification with XmlMatchers {
 
   private def equalExpectedOneIn(projectName: String, conditions: => MatchResult[Any] = always,
                                  options: String = "resolveClassifiers resolveSbtClassifiers resolveJavadocs") =
-    ("equal expected onae in '" + projectName + "' project [" + SbtVersionFull + "]").in { _: String =>
+    ("equal expected one in '" + projectName + "' project [" + SbtVersionFull + "]").in { _: String =>
       if (conditions.isSuccess)
         testProject(projectName, options)
       else
