@@ -60,6 +60,22 @@ class ImportSpec extends Specification with XmlMatchers {
 
     testDataFile must exist.setMessage("No test data for version " + SbtVersionFull + " found at " + testDataFile.getPath)
 
+    def formatErrorMessage(message: String, expected: String, actual: String): String =
+      String.format("Project: %s %n%s %n%s", project, message, getDiff(expected, actual))
+
+    def onXmlFail(actualStr: String, expectedStr: String) = {
+      dumpToFile(new File(base, "actual.xml"), actualStr)
+      val errorMessage = "Xml files are not equal, compare 'actual.xml' and 'structure-" + SbtVersionFull + ".xml'"
+      formatErrorMessage(errorMessage, expectedStr, actualStr)
+    }
+
+    def onEqualsFail(actual: Product, expected: Product) = {
+      dumpToFile(new File(base, "actual.txt"), prettyPrintCaseClass(actual))
+      dumpToFile(new File(base, "expected.txt"), prettyPrintCaseClass(expected))
+      val errorMessage = "Objects are not equal, compare 'actual.txt' and 'expected.txt'"
+      formatErrorMessage(errorMessage, prettyPrintCaseClass(expected), prettyPrintCaseClass(actual))
+    }
+
     try {
       val expectedStr = getExpectedStr(testDataFile, base)
       val actualStr = Loader.load(
@@ -79,25 +95,7 @@ class ImportSpec extends Specification with XmlMatchers {
         x.printStackTrace(System.err)
         throw x
     }
-
-    def formatErrorMessage(message: String, expected: String, actual: String): String =
-      String.format("Project: %s %n%s %n%s", project, message, getDiff(expected, actual))
-
-    def onXmlFail(actualStr: String, expectedStr: String) = {
-      dumpToFile(new File(base, "actual.xml"), actualStr)
-      val errorMessage = "Xml files are not equal, compare 'actual.xml' and 'structure-" + SbtVersionFull + ".xml'"
-      formatErrorMessage(errorMessage, expectedStr, actualStr)
-    }
-
-    def onEqualsFail(actual: Product, expected: Product) = {
-      dumpToFile(new File(base, "actual.txt"), prettyPrintCaseClass(actual))
-      dumpToFile(new File(base, "expected.txt"), prettyPrintCaseClass(expected))
-      val errorMessage = "Objects are not equal, compare 'actual.txt' and 'expected.txt'"
-      formatErrorMessage(errorMessage, prettyPrintCaseClass(expected), prettyPrintCaseClass(actual))
-    }
-
   }
-
   private def normalizePath(path: String): String =
     path.replace('\\', '/')
 
