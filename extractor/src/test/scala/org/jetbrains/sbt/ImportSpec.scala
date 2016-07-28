@@ -82,27 +82,13 @@ class ImportSpec extends Specification with XmlMatchers {
       sbtGlobalBase = sbtGlobalBase, sbtBootDir = sbtBootDir, sbtIvyHome = sbtIvyHome,
       verbose = true).mkString("\n")
 
-    try {
-      val actualXml = XML.loadString(actualStr)
-      val expectedXml = XML.loadString(expectedStr)
-      val actual = actualXml.deserialize[StructureData].right.get
-      val expected = expectedXml.deserialize[StructureData].right.get
+    val actualXml = XML.loadString(actualStr)
+    val expectedXml = XML.loadString(expectedStr)
+    val actual = actualXml.deserialize[StructureData].right.get
+    val expected = expectedXml.deserialize[StructureData].right.get
 
-      (actual == expected) must beTrue.updateMessage(_ => onEqualsFail(actual, expected))
-      actualXml must beEqualToIgnoringSpace(expectedXml).updateMessage(_ => onXmlFail(actualStr, expectedStr))
-
-    } catch {
-      case x: SAXParseException =>
-        System.err.println("SAX parse error. Actual/Expected XML was:")
-        System.err.println("Actual: \n" + actualStr)
-        System.err.println("Expected: \n" + expectedStr)
-
-        x.printStackTrace(System.err)
-        throw x
-      case x: Throwable =>
-        x.printStackTrace(System.err)
-        throw x
-    }
+    (actual == expected) must beTrue.updateMessage(_ => onEqualsFail(actual, expected))
+    actualXml must beEqualToIgnoringSpace(expectedXml).updateMessage(_ => onXmlFail(actualStr, expectedStr))
   }
 
   private def normalizePath(path: String): String =
